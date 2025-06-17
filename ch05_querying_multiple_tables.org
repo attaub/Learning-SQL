@@ -1,0 +1,249 @@
+#+PROPERTY: header-args :tangle  ./code/ch05_querying_multiple_tables.sql
+#+TITLE: Querying Multiple Tables
+#+AUTHOR: ATTA
+#+STARTUP: overview
+#+OPTIONS: toc:2
+
+* Table of contents :toc:
+- [[#what-is-a-join][What Is a Join?]]
+  - [[#cartesian-product][Cartesian Product]]
+  - [[#inner-joins][Inner Joins]]
+  - [[#the-ansi-join-syntax][The ANSI Join Syntax]]
+- [[#joining-three-or-more-tables][Joining Three or More Tables]]
+  - [[#using-subqueries-as-tables][Using Subqueries As Tables]]
+  - [[#using-the-same-table-twice][Using the Same Table Twice]]
+- [[#self-joins][Self-Joins]]
+- [[#equi-joins-versus-non-equi-joins][Equi-Joins Versus Non-Equi-Joins]]
+- [[#join-conditions-versus-filter-conditions][Join Conditions Versus Filter Conditions]]
+- [[#test-your-knowledge][Test Your Knowledge]]
+
+* What Is a Join? 
+Mechanism to bring the data from two tables back together again
+
+#+BEGIN_SRC sql
+DESC employee; 
+DESC department;
+#+END_SRC 
+
+** Cartesian Product 
+
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname, d.name
+ FROM employee e JOIN department d; 
+#+END_SRC 
+
+** Inner Joins
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname, d.name
+ FROM employee e JOIN department d
+ ON e.dept_id = d.dept_id;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname, d.name
+ FROM employee e INNER JOIN department d
+ ON e.dept_id = d.dept_id; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname, d.name
+ FROM employee e INNER JOIN department d
+USING (dept_id); 
+#+END_SRC 
+
+** The ANSI Join Syntax
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname, d.name
+ FROM employee e, department d
+ WHERE e.dept_id = d.dept_id;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.cust_id, a.open_date, a.product_cd
+  FROM account a, branch b, employee e
+  WHERE a.open_emp_id = e.emp_id
+  AND e.start_date < '2007-01-01'
+  AND e.assigned_branch_id = b.branch_id
+  AND (e.title = 'Teller' OR e.title = 'Head Teller')
+  AND b.name = 'Woburn Branch'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.cust_id, a.open_date, a.product_cd
+  FROM account a INNER JOIN employee e
+ON a.open_emp_id = e.emp_id
+INNER JOIN branch b
+ON e.assigned_branch_id = b.branch_id
+  WHERE e.start_date < '2007-01-01'
+AND (e.title = 'Teller' OR e.title = 'Head Teller')
+AND b.name = 'Woburn Branch'; 
+#+END_SRC 
+
+* Joining Three or More Tables 
+#+BEGIN_SRC sql
+SELECT a.account_id, c.fed_id
+FROM account a INNER JOIN customer c
+ON a.cust_id = c.cust_id
+WHERE c.cust_type_cd = 'B';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, c.fed_id, e.fname, e.lname
+  FROM account a INNER JOIN customer c
+ON a.cust_id = c.cust_id
+INNER JOIN employee e
+ON a.open_emp_id = e.emp_id
+  WHERE c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, c.fed_id, e.fname, e.lname
+ FROM customer c INNER JOIN account a
+ ON a.cust_id = c.cust_id
+ INNER JOIN employee e
+ ON a.open_emp_id = e.emp_id
+ WHERE c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, c.fed_id, e.fname, e.lname
+ FROM employee e INNER JOIN account a
+ ON e.emp_id = a.open_emp_id
+ INNER JOIN customer c
+ ON a.cust_id = c.cust_id
+ WHERE c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT STRAIGHT_JOIN a.account_id, c.fed_id, e.fname, e.lname
+FROM customer c INNER JOIN account a
+ON a.cust_id = c.cust_id
+INNER JOIN employee e
+ON a.open_emp_id = e.emp_id
+WHERE c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+** Using Subqueries As Tables
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.cust_id, a.open_date, a.product_cd
+  FROM account a INNER JOIN
+  (SELECT emp_id, assigned_branch_id
+  FROM employee
+  WHERE start_date < '2007-01-01'
+  AND (title = 'Teller' OR title = 'Head Teller')) e
+  ON a.open_emp_id = e.emp_id
+  INNER JOIN
+  (SELECT branch_id
+  FROM branch
+  WHERE name = 'Woburn Branch') b
+  ON e.assigned_branch_id = b.branch_id; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, assigned_branch_id
+ FROM employee
+ WHERE start_date < '2007-01-01'
+AND (title = 'Teller' OR title = 'Head Teller');
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT branch_id
+ FROM branch
+ WHERE name = 'Woburn Branch';
+#+END_SRC 
+
+** Using the Same Table Twice
+
+#+BEGIN_SRC sql
+SELECT a.account_id, e.emp_id,
+b_a.name open_branch, b_e.name emp_branch
+FROM account a INNER JOIN branch b_a
+ON a.open_branch_id = b_a.branch_id
+INNER JOIN employee e
+ON a.open_emp_id = e.emp_id
+INNER JOIN branch b_e
+ON e.assigned_branch_id = b_e.branch_id
+WHERE a.product_cd = 'CHK';
+#+END_SRC 
+
+* Self-Joins 
+#+BEGIN_SRC sql
+SELECT e.fname, e.lname,
+e_mgr.fname mgr_fname, e_mgr.lname mgr_lname
+FROM employee e INNER JOIN employee e_mgr
+ON e.superior_emp_id = e_mgr.emp_id;
+#+END_SRC 
+
+* Equi-Joins Versus Non-Equi-Joins 
+
+#+BEGIN_SRC sql
+-- ON e.assigned_branch_id = b.branch_id 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT e.emp_id, e.fname, e.lname, e.start_date
+FROM employee e INNER JOIN product p
+ON e.start_date >= p.date_offered
+AND e.start_date <= p.date_retired
+WHERE p.name = 'no-fee checking'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname
+FROM employee e1 INNER JOIN employee e2
+ON e1.emp_id != e2.emp_id
+WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname
+FROM employee e1 INNER JOIN employee e2
+ON e1.emp_id < e2.emp_id
+WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
+#+END_SRC 
+
+* Join Conditions Versus Filter Conditions 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.product_cd, c.fed_id
+ FROM account a INNER JOIN customer c
+ON a.cust_id = c.cust_id
+ WHERE c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.product_cd, c.fed_id
+FROM account a INNER JOIN customer c
+ON a.cust_id = c.cust_id
+AND c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT a.account_id, a.product_cd, c.fed_id
+FROM account a INNER JOIN customer c
+WHERE a.cust_id = c.cust_id
+AND c.cust_type_cd = 'B'; 
+#+END_SRC 
+
+
+* Test Your Knowledge 
+
+- Fill in the blanks (denoted by <#>) for the following query to obtain the results that follow:
+  #+BEGIN_SRC sql
+    mysql> SELECT e.emp_id, e.fname, e.lname, b.name
+    FROM employee e INNER JOIN <1> b
+    ON e.assigned_branch_id = b.<2>;
+  #+END_SRC 
+
+  #+BEGIN_SRC sql
+    SELECT e.emp_id, e.fname, e.lname, b.name
+      FROM employee e INNER JOIN <1> b
+      ON e.assigned_branch_id = b.<2>;
+  #+END_SRC 
+
+- Write a query that returns the account ID for each nonbusiness customer (customer.cust_type_cd = 'I') with the customer's federal ID (customer.fed_id) and the name of the product on which the account is based (product.name).
+
+ -  
+
+
