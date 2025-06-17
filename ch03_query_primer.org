@@ -1,0 +1,322 @@
+#+PROPERTY: header-args :tangle  ./code/ch04_query_primer.sql
+#+TITLE: QUERRY PRIMER 
+#+AUTHOR: ATTA
+#+STARTUP: overview
+#+OPTIONS: toc:1
+
+
+* Table of contents :toc:
+- [[#querry-mechanics][Querry Mechanics]]
+- [[#querry-clauses][Querry Clauses]]
+- [[#the-select-clause][The select Clause]]
+  - [[#column-aliases][Column Aliases]]
+  - [[#removing-dublicates][Removing Dublicates]]
+- [[#the-from-clause][The from Clause]]
+  - [[#tables][Tables]]
+  - [[#views][Views]]
+  - [[#table-links][Table Links]]
+  - [[#defining-table-aliases][Defining Table Aliases]]
+- [[#the-where-clause][The where Clause]]
+- [[#the-group-by-and-having-clauses][The group by and having Clauses]]
+- [[#the-order-by-clause][The order by Clause]]
+  - [[#ascending-versus-descending-sort-order][Ascending Versus Descending Sort Order]]
+  - [[#sorting-via-expressions][Sorting via Expressions]]
+  - [[#sorting-via-numeric-placeholders][Sorting via Numeric Placeholders]]
+- [[#test-your-knowledge][Test Your Knowledge]]
+
+* Querry Mechanics
+
+#+BEGIN_SRC sql 
+SELECT emp_id, fname, lname FROM employee WHERE lname = 'Bkadfl';
+SELECT emp_id, fname, lname FROM employee ;
+#+END_SRC 
+
+* Querry Clauses
+
+Several components or clauses make up the select statement.
+
+While only one of them is mandatory when using MySQL (the select clause), you will usually include at least two or three of the six available clauses.
+
+
+| Clause name | Purpose                                                    |
+| Select      | Determines which columns to include in result              |
+| From        | Identifies tables from which to draw data and how to joine |
+| Where       | Filters out unwanted data                                  |
+| Group by    | Used to group rows together by common column values        |
+| Having      | Filters out unwanted groups                                |
+| Order by    | Sorts rows of final result set by one or more columns      |
+ 
+
+* The select Clause 
+
+#+BEGIN_SRC sql
+SELECT * FROM department;
+SELECT dept_id, name  FROM department;
+SELECT  name  FROM department;
+#+END_SRC 
+
+
+
+#+BEGIN_SRC sql
+SELECT emp_id,
+  'ACTIVE',
+  emp_id * 3.14159,
+  UPPER(lname)
+  FROM employee;
+#+END_SRC 
+
+
+#+BEGIN_SRC sql
+SELECT VERSION(),
+  USER(),
+  DATABASE();
+#+END_SRC 
+
+
+** Column Aliases
+
+#+BEGIN_SRC sql
+SELECT emp_id,
+  'ACTIVE' status,
+  emp_id * 3.14159 empid_x_pi,
+  UPPER(lname) last_name_upper
+  FROM employee;
+#+END_SRC 
+
+
+#+BEGIN_SRC sql
+SELECT emp_id,
+  'ACTIVE' AS status,
+  emp_id * 3.14159 AS empid_x_pi,
+  UPPER(lname) AS last_name_upper
+  FROM employee;
+#+END_SRC 
+
+** Removing Dublicates
+#+BEGIN_SRC sql
+SELECT cust_id
+  FROM account;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT DISTINCT cust_id
+  FROM account;
+#+END_SRC 
+
+* The from Clause 
+** Tables
+Subquery-generated tables
+  A subquery is a query contained within another query.
+  Surrounded by parentheses and can be found in various parts of a select statement
+  A subquery serves the role of generating a temporary table that is visible from all other query clauses and can interact with other tables named in the from clause
+
+ #+BEGIN_SRC sql
+ SELECT e.emp_id, e.fname, e.lname
+   FROM (SELECT emp_id, fname, lname, start_date, title
+   FROM employee) e;
+ #+END_SRC  
+
+
+ #+BEGIN_SRC sql
+ SELECT emp_id, fname, lname, start_date, title
+   FROM employee
+ #+END_SRC  
+
+
+ #+BEGIN_SRC sql
+   
+SELECT e.emp_id, e.fname, e.lname, e.start_date, e.title
+  FROM employee e
+ #+END_SRC  
+
+** Views
+
+A view is a query that is stored in the data dictionary.
+
+It looks and acts like a table, but there is no data associated with a view (this is why I call it a virtual table).
+
+When you issue a query against a view, your query is merged with the view definition to create a final query to be executed.
+
+To demonstrate, here's a view definition that queries the employee table and includes a call to a built-in function:
+
+ #+BEGIN_SRC sql
+CREATE VIEW employee_vw AS
+  SELECT emp_id, fname, lname,
+  YEAR(start_date) start_year
+  FROM employee;
+ #+END_SRC 
+
+
+ #+BEGIN_SRC sql
+SELECT emp_id, start_year
+  FROM employee_vw;
+ #+END_SRC 
+ 
+** Table Links
+
+When more than one table appears in the from clause,
+the conditions used to link the tables must be included as well.
+
+Most portable across the various database servers
+
+#+BEGIN_SRC sql
+SELECT employee.emp_id, employee.fname,
+  employee.lname, department.name dept_name
+  FROM employee INNER JOIN department
+  ON employee.dept_id = department.dept_id;
+#+END_SRC 
+
+** Defining Table Aliases
+
+When multiple tables are joined in a single query, you need a way to identify which table you are referring to when you reference columns in the select, where, group by, having, and order by clauses.
+
+You have two choices when referencing a table outside the from clause
+
+Use the entire table name
+Assign each table an alias and use the alias throughout the query
+
+#+BEGIN_SRC sql
+SELECT e.emp_id, e.fname, e.lname,
+ d.name dept_name
+ FROM employee e INNER JOIN department d
+ ON e.dept_id = d.dept_id;
+#+END_SRC 
+
+* The where Clause 
+
+The where clause is the mechanism for filtering out unwanted rows from your result set.
+
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date, title
+  FROM employee
+  WHERE title = 'Head Teller';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date, title
+FROM employee
+WHERE title = 'Head Teller'
+AND start_date > '2006-01-01';
+#+END_SRC 
+
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date, title
+FROM employee
+WHERE title = 'Head Teller'
+OR start_date > '2006-01-01';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date, title
+FROM employee
+WHERE (title = 'Head Teller' AND start_date > '2006-01-01')
+OR (title = 'Teller' AND start_date > '2007-01-01');
+#+END_SRC 
+
+* The group by and having Clauses 
+
+All the queries thus far have retrieved raw data without any manipulation.
+
+Sometimes, however, you will want to find trends in your data that will require the database server to cook the data a bit before you retrieve your result set.
+
+One such mechanism is the group by clause, which is used to group data by column values.
+
+When using the group by clause, you may also use the having clause, which allows you to filter group data in the same way the where clause lets you filter raw data.
+
+#+BEGIN_SRC sql
+SELECT d.name, count(e.emp_id) num_employees
+FROM department d INNER JOIN employee e
+ON d.dept_id = e.dept_id
+GROUP BY d.name
+HAVING count(e.emp_id) > 2;
+#+END_SRC 
+
+* The order by Clause 
+
+The order by clause is the mechanism for sorting your result set using either raw column data or expressions based on column data.
+
+#+BEGIN_SRC sql
+SELECT open_emp_id, product_cd FROM account; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT open_emp_id, product_cd
+  FROM account
+  ORDER BY open_emp_id;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT open_emp_id, product_cd
+FROM account
+ORDER BY open_emp_id, product_cd;
+#+END_SRC 
+
+** Ascending Versus Descending Sort Order
+
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, open_date, avail_balance
+ FROM account
+ ORDER BY avail_balance DESC; 
+#+END_SRC 
+
+** Sorting via Expressions
+
+#+BEGIN_SRC sql
+SELECT cust_id, cust_type_cd, city, state, fed_id
+ FROM customer
+ ORDER BY RIGHT(fed_id, 3);
+#+END_SRC 
+
+** Sorting via Numeric Placeholders
+#+BEGIN_SRC sql
+SELECT emp_id, title, start_date, fname, lname
+ FROM employee
+ ORDER BY 2, 5;
+#+END_SRC 
+
+* Test Your Knowledge 
+
+1. Retrieve the employee ID, first name, and last name for all bank employees. Sort by last name and then by first name.
+
+   #+BEGIN_SRC sql
+
+ SELECT emp_id, fname, lname FROM employee
+   ORDER by lname, fname;
+   #+END_SRC 
+
+2. Retrieve the account ID, customer ID, and available balance for all accounts whose status equals 'ACTIVE' and whose available balance is greater than $2,500.
+
+   #+BEGIN_SRC sql
+   SELECT a.account_id, a.cust_id, a.avail_balance from account a
+     WHERE status='ACTIVE'; 
+   #+END_SRC 
+
+3. Write a query against the account table that returns the IDs of the employees who opened the accounts (use the account.open_emp_id column).
+   Include a single row for each distinct employee.
+
+   #+BEGIN_SRC sql
+   SELECT * FROM account;
+   SELECT open_emp_id FROM account;
+   SELECT a.open_emp_id FROM account a;
+   SELECT distinct(a.open_emp_id) FROM account a;
+   #+END_SRC 
+
+4. Fill in the blanks (denoted by <#>) for this multi-data-set query to achieve the results shown here: mysql> SELECT p.product_cd,
+   #+BEGIN_SRC sql
+    SELECT p.product_cd, a.cust_id, a.avail_balance
+    FROM product p INNER JOIN account <1>
+    ON p.product_cd = <2>
+    WHERE p.<3> = 'ACCOUNT'
+    ORDER BY <4>, <5>;
+    #+END_SRC 
+
+    #+BEGIN_SRC sql
+    SELECT p.product_cd, a.cust_id, a.avail_balance
+    FROM product p INNER JOIN account a
+    ON p.product_cd = a.product_cd
+    WHERE p.product_type_cd = 'ACCOUNT'
+    ORDER BY p.product_cd, a.cust_id;
+    #+END_SRC 
+

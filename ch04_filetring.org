@@ -1,0 +1,304 @@
+#+PROPERTY: header-args :tangle  ./code/ch04_filtering.sql
+#+TITLE: QUERRY PRIMER 
+#+AUTHOR: ATTA
+#+STARTUP: overview
+#+OPTIONS: toc:1
+
+* Table of contents :toc:
+- [[#introduction][Introduction]]
+- [[#condition-evaluation][Condition Evaluation]]
+  - [[#using-parentheses][Using Parentheses]]
+  - [[#using-the-not-operator][Using the not Operator]]
+- [[#building-a-condition][Building a Condition]]
+- [[#condition-types][Condition Types]]
+  - [[#equality-condition][Equality Condition]]
+  - [[#inequality-condition][Inequality Condition]]
+  - [[#data-modification-using-equality-conditions][Data modification using equality conditions]]
+  - [[#range-conditions][Range Conditions]]
+  - [[#the-between-operator][The between operator]]
+  - [[#string-ranges][String ranges]]
+  - [[#membership-conditions][Membership Conditions]]
+  - [[#using-subqueries][Using subqueries]]
+  - [[#using-not-in][Using not in]]
+  - [[#matching-conditions][Matching Conditions]]
+  - [[#using-wildcards][Using wildcards]]
+  - [[#using-regular-expressions][Using regular expressions]]
+- [[#not-null-that-four-letter-word][Not Null: That Four-Letter Word]]
+- [[#test-your-knowledge][Test Your Knowledge]]
+
+* Introduction
+
+All the SQL data statements include an optional where clause to house filter conditions used to restrict the number of rows acted on by the SQL statement.
+
+The select statement includes a having clause in which filter conditions pertaining to grouped data may be included.
+
+* Condition Evaluation 
+#+BEGIN_SRC sql
+/*  WHERE title = 'Teller' AND start_date < '2007-01-01' */
+/*  WHERE title = 'Teller' OR start_date < '2007-01-01' */
+#+END_SRC 
+** Using Parentheses
+
+#+BEGIN_SRC sql
+/*  WHERE end_date IS NULL
+      AND (title = 'Teller' OR start_date < '2007-01-01')
+*/
+#+END_SRC 
+** Using the not Operator
+#+BEGIN_SRC sql
+/* WHERE end_date IS NULL
+    AND NOT (title = 'Teller' OR start_date < '2007-01-01')
+*/
+#+END_SRC 
+
+#+BEGIN_SRC sql
+/* WHERE end_date IS NULL
+  AND title != 'Teller' AND start_date >= '2007-01-01'
+  */
+#+END_SRC 
+
+* Building a Condition 
+
+A condition is made up of one or more expressions coupled with one or more operators. An expression can be any of the following:
+- A number
+- A column in a table or view
+- A string literal
+- A built-in function
+- A subquery
+- A list of expressions
+The operators used within conditions include:
+- Comparison operators, such as =, !=, <, >, <>, LIKE, IN, and BETWEEN
+- Arithmetic operators, such as +, -, *, and /
+
+* Condition Types 
+
+There are many different ways to filter out unwanted data.
+You can look for specific values, sets of values, or ranges of values to include or exclude, or you can use various pattern-searching techniques to look for partial matches when dealing with string data.
+
+** Equality Condition
+#+BEGIN_SRC sql
+title = 'Teller'
+fed_id = '111-11-1111'
+amount = 375.25
+dept_id = (SELECT dept_id FROM department WHERE name = 'Loans')
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT pt.name product_type, p.name product
+   FROM product p INNER JOIN product_type pt
+ ON p.product_type_cd = pt.product_type_cd
+   WHERE pt.name = 'Customer Accounts';
+#+END_SRC 
+
+** Inequality Condition
+#+BEGIN_SRC sql
+SELECT pt.name product_type, p.name product
+FROM product p INNER JOIN product_type pt
+ON p.product_type_cd = pt.product_type_cd
+WHERE pt.name <> 'Customer Accounts';
+-- WHERE pt.name != 'Customer Accounts';
+#+END_SRC 
+** Data modification using equality conditions
+#+BEGIN_SRC sql
+DELETE FROM account
+  WHERE status = 'CLOSED' AND YEAR(close_date) = 2002;
+#+END_SRC 
+** Range Conditions
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date
+ FROM employee
+ WHERE start_date < '2007-01-01';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date
+ FROM employee
+ WHERE start_date < '2007-01-01'
+AND start_date >= '2005-01-01'; 
+#+END_SRC 
+
+** The between operator
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date
+ FROM employee
+ WHERE start_date BETWEEN '2005-01-01' AND '2007-01-01';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, start_date
+ FROM employee
+ WHERE start_date BETWEEN '2007-01-01' AND '2005-01-01'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, cust_id, avail_balance
+ FROM account
+ WHERE avail_balance BETWEEN 3000 AND 5000; 
+#+END_SRC 
+
+** String ranges
+#+BEGIN_SRC sql
+SELECT cust_id, fed_id
+ FROM customer
+ WHERE cust_type_cd = 'I'
+AND fed_id BETWEEN '500-00-0000' AND '999-99-9999'; 
+#+END_SRC 
+
+** Membership Conditions
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, cust_id, avail_balance
+ FROM account
+ WHERE product_cd = 'CHK' OR product_cd = 'SAV'
+OR product_cd = 'CD' OR product_cd = 'MM';
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, cust_id, avail_balance
+FROM account
+WHERE product_cd IN ('CHK','SAV','CD','MM'); 
+#+END_SRC 
+
+** Using subqueries
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, cust_id, avail_balance
+ FROM account
+ WHERE product_cd IN (SELECT product_cd FROM product
+WHERE product_type_cd = 'ACCOUNT');
+#+END_SRC 
+** Using not in
+#+BEGIN_SRC sql
+SELECT account_id, product_cd, cust_id, avail_balance
+FROM account
+WHERE product_cd NOT IN ('CHK','SAV','CD','MM');
+#+END_SRC 
+** Matching Conditions
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname
+ FROM employee
+ WHERE LEFT(lname, 1) = 'T';
+#+END_SRC 
+** Using wildcards
+- Strings beginning/ending with a certain character
+- Strings beginning/ending with a substring
+- Strings containing a certain character anywhere within the string
+- Strings containing a substring anywhere within the string
+- Strings with a specific format, regardless of individual characters
+
+_  Exactly one character
+%  Any number of characters (including 0)
+
+
+#+BEGIN_SRC sql
+SELECT lname
+ FROM employee
+ WHERE lname LIKE '_a%e%'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT cust_id, fed_id
+ FROM customer
+ WHERE fed_id LIKE '___-__-____'; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname
+FROM employee
+WHERE lname LIKE 'F%' OR lname LIKE 'G%';
+#+END_SRC 
+
+** Using regular expressions
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname
+ FROM employee
+ WHERE lname REGEXP '^[FG]'; 
+#+END_SRC 
+
+* Not Null: That Four-Letter Word 
+
+  Various flavors of null:
+    Not applicable
+    Value not yet known
+    Value undefined
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, superior_emp_id
+ FROM employee
+ WHERE superior_emp_id IS NULL;
+#+END_SRC    
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, superior_emp_id 
+  FROM employee
+  WHERE superior_emp_id = NULL;
+
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, superior_emp_id
+ FROM employee
+ WHERE superior_emp_id IS NOT NULL; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname, superior_emp_id
+ FROM employee
+ WHERE superior_emp_id != 6; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+ SELECT emp_id, fname, lname, superior_emp_id
+ FROM employee
+ WHERE superior_emp_id != 6 OR superior_emp_id IS NULL; 
+#+END_SRC 
+* Test Your Knowledge 
+
+
+| Txn_id |    Txn_date | Account_id | Txn_type_cd |  Amount |
+|     1 | 2005-02-22 |       101 | CDT       | 1000.00 |
+|     2 | 2005-02-23 |       102 | CDT       |  525.75 |
+|     3 | 2005-02-24 |       101 | DBT       |  100.00 |
+|     4 | 2005-02-24 |       103 | CDT       |      55 |
+|     5 | 2005-02-25 |       101 | DBT       |      50 |
+|     6 | 2005-02-25 |       103 | DBT       |      25 |
+|     7 | 2005-02-25 |       102 | CDT       |  125.37 |
+|     8 | 2005-02-26 |       103 | DBT       |      10 |
+|     9 | 2005-02-27 |       101 | CDT       |      75 |
+
+
+1. Which of the transaction IDs would be returned by the following filter conditions?
+   #+BEGIN_SRC sql
+        txn_date < '2005-02-26' AND (txn_type_cd = 'DBT' OR amount > 100)
+   #+END_SRC 
+
+   
+| Txn_id |    Txn_date | Account_id | Txn_type_cd |  Amount |
+|     1 | 2005-02-22 |       101 | CDT       | 1000.00 |
+|     2 | 2005-02-23 |       102 | CDT       |  525.75 |
+|     3 | 2005-02-24 |       101 | DBT       |  100.00 |
+|     5 | 2005-02-25 |       101 | DBT       |      50 |
+|     6 | 2005-02-25 |       103 | DBT       |      25 |
+|     7 | 2005-02-25 |       102 | CDT       |  125.37 |
+
+2. Which of the transaction IDs would be returned by the following filter conditions?
+
+   #+BEGIN_SRC sql
+account_id IN (101,103) AND NOT (txn_type_cd = 'DBT' OR amount > 100) 
+   #+END_SRC 
+
+
+| Txn_id |    Txn_date | Account_id | Txn_type_cd |  Amount |
+|     4 | 2005-02-24 |       103 | CDT       |      55 |
+|     9 | 2005-02-27 |       101 | CDT       |      75 |
+
+
+3. Construct a query that retrieves all accounts opened in 2002.
+   #+BEGIN_SRC sql
+     select * from account where open_date LIKE "2002%";
+   #+END_SRC 
+
+4. Construct a query that finds all nonbusiness customers whose last name contains an a in the second position and an e anywhere after the a.
+
+   #+BEGIN_SRC sql
+     -- SELECT * from individual where lname LIKE "_a%e"-- ; 
+   #+END_SRC 
+   
