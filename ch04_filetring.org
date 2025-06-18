@@ -19,10 +19,8 @@
   - [[#string-ranges][String ranges]]
   - [[#membership-conditions][Membership Conditions]]
   - [[#using-subqueries][Using subqueries]]
-  - [[#using-not-in][Using not in]]
   - [[#matching-conditions][Matching Conditions]]
   - [[#using-wildcards][Using wildcards]]
-  - [[#using-regular-expressions][Using regular expressions]]
 - [[#not-null-that-four-letter-word][Not Null: That Four-Letter Word]]
 - [[#test-your-knowledge][Test Your Knowledge]]
 
@@ -100,82 +98,41 @@ WHERE pt.name <> 'Customer Accounts';
 #+END_SRC 
 ** Data modification using equality conditions
 #+BEGIN_SRC sql
-DELETE FROM account
-  WHERE status = 'CLOSED' AND YEAR(close_date) = 2002;
+DELETE FROM account WHERE status = 'CLOSED' AND YEAR(close_date) = 2002;
 #+END_SRC 
 ** Range Conditions
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date
- FROM employee
- WHERE start_date < '2007-01-01';
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date
- FROM employee
- WHERE start_date < '2007-01-01'
-AND start_date >= '2005-01-01'; 
+SELECT emp_id, fname, lname, start_date FROM employee WHERE start_date < '2007-01-01';
+SELECT emp_id, fname, lname, start_date FROM employee WHERE start_date < '2007-01-01' AND start_date >= '2005-01-01'; 
 #+END_SRC 
 
 ** The between operator
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date
- FROM employee
- WHERE start_date BETWEEN '2005-01-01' AND '2007-01-01';
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date
- FROM employee
- WHERE start_date BETWEEN '2007-01-01' AND '2005-01-01'; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT account_id, product_cd, cust_id, avail_balance
- FROM account
- WHERE avail_balance BETWEEN 3000 AND 5000; 
+SELECT emp_id, fname, lname, start_date FROM employee WHERE start_date BETWEEN '2005-01-01' AND '2007-01-01';
+SELECT emp_id, fname, lname, start_date FROM employee WHERE start_date BETWEEN '2007-01-01' AND '2005-01-01'; 
+SELECT account_id, product_cd, cust_id, avail_balance FROM account WHERE avail_balance BETWEEN 3000 AND 5000; 
 #+END_SRC 
 
 ** String ranges
 #+BEGIN_SRC sql
-SELECT cust_id, fed_id
- FROM customer
- WHERE cust_type_cd = 'I'
-AND fed_id BETWEEN '500-00-0000' AND '999-99-9999'; 
+SELECT cust_id, fed_id FROM customer WHERE cust_type_cd = 'I' AND fed_id BETWEEN '500-00-0000' AND '999-99-9999'; 
+-- SELECT cust_id, fed_id, cust_type_cd FROM customer WHERE cust_type_cd = 'I' AND fed_id BETWEEN '500-00-0000' AND '999-99-9999'; 
 #+END_SRC 
 
 ** Membership Conditions
 #+BEGIN_SRC sql
-SELECT account_id, product_cd, cust_id, avail_balance
- FROM account
- WHERE product_cd = 'CHK' OR product_cd = 'SAV'
-OR product_cd = 'CD' OR product_cd = 'MM';
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT account_id, product_cd, cust_id, avail_balance
-FROM account
-WHERE product_cd IN ('CHK','SAV','CD','MM'); 
+SELECT account_id, product_cd, cust_id, avail_balance FROM account WHERE product_cd = 'CHK' OR product_cd = 'SAV' OR product_cd = 'CD' OR product_cd = 'MM';
+SELECT account_id, product_cd, cust_id, avail_balance FROM account WHERE product_cd IN ('CHK','SAV','CD','MM'); 
 #+END_SRC 
 
 ** Using subqueries
 #+BEGIN_SRC sql
-SELECT account_id, product_cd, cust_id, avail_balance
- FROM account
- WHERE product_cd IN (SELECT product_cd FROM product
-WHERE product_type_cd = 'ACCOUNT');
-#+END_SRC 
-** Using not in
-#+BEGIN_SRC sql
-SELECT account_id, product_cd, cust_id, avail_balance
-FROM account
-WHERE product_cd NOT IN ('CHK','SAV','CD','MM');
+SELECT account_id, product_cd, cust_id, avail_balance FROM account WHERE product_cd IN (SELECT product_cd FROM product WHERE product_type_cd = 'ACCOUNT');
+SELECT account_id, product_cd, cust_id, avail_balance FROM account WHERE product_cd NOT IN ('CHK','SAV','CD','MM');
 #+END_SRC 
 ** Matching Conditions
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname
- FROM employee
- WHERE LEFT(lname, 1) = 'T';
+SELECT emp_id, fname, lname FROM employee WHERE LEFT(lname, 1) = 'T';
 #+END_SRC 
 ** Using wildcards
 - Strings beginning/ending with a certain character
@@ -189,29 +146,10 @@ _  Exactly one character
 
 
 #+BEGIN_SRC sql
-SELECT lname
- FROM employee
- WHERE lname LIKE '_a%e%'; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT cust_id, fed_id
- FROM customer
- WHERE fed_id LIKE '___-__-____'; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname
-FROM employee
-WHERE lname LIKE 'F%' OR lname LIKE 'G%';
-#+END_SRC 
-
-** Using regular expressions
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname
- FROM employee
- WHERE lname REGEXP '^[FG]'; 
+SELECT lname FROM employee WHERE lname LIKE '_a%e%'; 
+SELECT cust_id, fed_id FROM customer WHERE fed_id LIKE '___-__-____'; 
+SELECT emp_id, fname, lname FROM employee WHERE lname LIKE 'F%' OR lname LIKE 'G%';
+SELECT emp_id, fname, lname FROM employee WHERE lname REGEXP '^[FG]'; 
 #+END_SRC 
 
 * Not Null: That Four-Letter Word 
@@ -221,34 +159,11 @@ SELECT emp_id, fname, lname
     Value not yet known
     Value undefined
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, superior_emp_id
- FROM employee
- WHERE superior_emp_id IS NULL;
-#+END_SRC    
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, superior_emp_id 
-  FROM employee
-  WHERE superior_emp_id = NULL;
-
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, superior_emp_id
- FROM employee
- WHERE superior_emp_id IS NOT NULL; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, superior_emp_id
- FROM employee
- WHERE superior_emp_id != 6; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
- SELECT emp_id, fname, lname, superior_emp_id
- FROM employee
- WHERE superior_emp_id != 6 OR superior_emp_id IS NULL; 
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NULL;
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id = NULL;
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NOT NULL; 
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6; 
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6 OR superior_emp_id IS NULL; 
 #+END_SRC 
 * Test Your Knowledge 
 
@@ -302,3 +217,4 @@ account_id IN (101,103) AND NOT (txn_type_cd = 'DBT' OR amount > 100)
      -- SELECT * from individual where lname LIKE "_a%e"-- ; 
    #+END_SRC 
    
+ 

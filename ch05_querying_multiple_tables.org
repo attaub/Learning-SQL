@@ -81,46 +81,31 @@ AND b.name = 'Woburn Branch';
 
 * Joining Three or More Tables 
 #+BEGIN_SRC sql
-SELECT a.account_id, c.fed_id
-FROM account a INNER JOIN customer c
-ON a.cust_id = c.cust_id
-WHERE c.cust_type_cd = 'B';
-#+END_SRC 
 
-#+BEGIN_SRC sql
-SELECT a.account_id, c.fed_id, e.fname, e.lname
-  FROM account a INNER JOIN customer c
-ON a.cust_id = c.cust_id
-INNER JOIN employee e
-ON a.open_emp_id = e.emp_id
-  WHERE c.cust_type_cd = 'B'; 
-#+END_SRC 
+SELECT a.account_id, c.fed_id FROM account a
+  INNER JOIN customer c ON a.cust_id = c.cust_id
+    WHERE c.cust_type_cd = 'B';
 
-#+BEGIN_SRC sql
-SELECT a.account_id, c.fed_id, e.fname, e.lname
- FROM customer c INNER JOIN account a
- ON a.cust_id = c.cust_id
- INNER JOIN employee e
- ON a.open_emp_id = e.emp_id
- WHERE c.cust_type_cd = 'B'; 
-#+END_SRC 
+SELECT a.account_id, c.fed_id, e.fname, e.lname FROM account a
+  INNER JOIN customer c ON a.cust_id = c.cust_id
+  INNER JOIN employee e ON a.open_emp_id = e.emp_id
+    WHERE c.cust_type_cd = 'B'; 
 
-#+BEGIN_SRC sql
-SELECT a.account_id, c.fed_id, e.fname, e.lname
- FROM employee e INNER JOIN account a
- ON e.emp_id = a.open_emp_id
- INNER JOIN customer c
- ON a.cust_id = c.cust_id
- WHERE c.cust_type_cd = 'B'; 
-#+END_SRC 
+SELECT a.account_id, c.fed_id, e.fname, e.lname FROM customer c
+  INNER JOIN account a ON a.cust_id = c.cust_id
+  INNER JOIN employee e ON a.open_emp_id = e.emp_id
+    WHERE c.cust_type_cd = 'B'; 
+    
+SELECT a.account_id, c.fed_id, e.fname, e.lname FROM employee e
+  INNER JOIN account a ON e.emp_id = a.open_emp_id
+  INNER JOIN customer c ON a.cust_id = c.cust_id
+   WHERE c.cust_type_cd = 'B'; 
 
-#+BEGIN_SRC sql
-SELECT STRAIGHT_JOIN a.account_id, c.fed_id, e.fname, e.lname
-FROM customer c INNER JOIN account a
-ON a.cust_id = c.cust_id
-INNER JOIN employee e
-ON a.open_emp_id = e.emp_id
-WHERE c.cust_type_cd = 'B'; 
+SELECT STRAIGHT_JOIN a.account_id, c.fed_id, e.fname, e.lname FROM customer c
+  INNER JOIN account a ON a.cust_id = c.cust_id
+  INNER JOIN employee e ON a.open_emp_id = e.emp_id
+    WHERE c.cust_type_cd = 'B'; 
+    
 #+END_SRC 
 
 ** Using Subqueries As Tables
@@ -169,81 +154,60 @@ WHERE a.product_cd = 'CHK';
 
 * Self-Joins 
 #+BEGIN_SRC sql
-SELECT e.fname, e.lname,
-e_mgr.fname mgr_fname, e_mgr.lname mgr_lname
-FROM employee e INNER JOIN employee e_mgr
-ON e.superior_emp_id = e_mgr.emp_id;
+SELECT e.fname, e.lname, e_mgr.fname mgr_fname, e_mgr.lname mgr_lname FROM employee e
+  INNER JOIN employee e_mgr ON e.superior_emp_id = e_mgr.emp_id;
 #+END_SRC 
-
 * Equi-Joins Versus Non-Equi-Joins 
 
 #+BEGIN_SRC sql
--- ON e.assigned_branch_id = b.branch_id 
-#+END_SRC 
+      -- ON e.assigned_branch_id = b.branch_id 
+SELECT e.emp_id, e.fname, e.lname, e.start_date FROM employee e
+  INNER JOIN product p ON e.start_date >= p.date_offered AND e.start_date <= p.date_retired
+  WHERE p.name = 'no-fee checking'; 
 
-#+BEGIN_SRC sql
-SELECT e.emp_id, e.fname, e.lname, e.start_date
-FROM employee e INNER JOIN product p
-ON e.start_date >= p.date_offered
-AND e.start_date <= p.date_retired
-WHERE p.name = 'no-fee checking'; 
-#+END_SRC 
+SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname FROM employee e1
+  INNER JOIN employee e2 ON e1.emp_id != e2.emp_id
+  WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
 
-#+BEGIN_SRC sql
-SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname
-FROM employee e1 INNER JOIN employee e2
-ON e1.emp_id != e2.emp_id
-WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname
-FROM employee e1 INNER JOIN employee e2
-ON e1.emp_id < e2.emp_id
-WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
+SELECT e1.fname, e1.lname, 'VS' vs, e2.fname, e2.lname FROM employee e1
+  INNER JOIN employee e2 ON e1.emp_id < e2.emp_id
+  WHERE e1.title = 'Teller' AND e2.title = 'Teller'; 
 #+END_SRC 
 
 * Join Conditions Versus Filter Conditions 
 
 #+BEGIN_SRC sql
-SELECT a.account_id, a.product_cd, c.fed_id
- FROM account a INNER JOIN customer c
-ON a.cust_id = c.cust_id
- WHERE c.cust_type_cd = 'B'; 
-#+END_SRC 
+SELECT a.account_id, a.product_cd, c.fed_id FROM account a
+  INNER JOIN customer c ON a.cust_id = c.cust_id
+  WHERE c.cust_type_cd = 'B'; 
 
-#+BEGIN_SRC sql
-SELECT a.account_id, a.product_cd, c.fed_id
-FROM account a INNER JOIN customer c
-ON a.cust_id = c.cust_id
-AND c.cust_type_cd = 'B'; 
-#+END_SRC 
+SELECT a.account_id, a.product_cd, c.fed_id FROM account a
+  INNER JOIN customer c ON a.cust_id = c.cust_id
+  AND c.cust_type_cd = 'B'; 
 
-#+BEGIN_SRC sql
-SELECT a.account_id, a.product_cd, c.fed_id
-FROM account a INNER JOIN customer c
-WHERE a.cust_id = c.cust_id
-AND c.cust_type_cd = 'B'; 
+SELECT a.account_id, a.product_cd, c.fed_id FROM account a
+  INNER JOIN customer c WHERE a.cust_id = c.cust_id AND c.cust_type_cd = 'B'; 
 #+END_SRC 
-
 
 * Test Your Knowledge 
 
 - Fill in the blanks (denoted by <#>) for the following query to obtain the results that follow:
   #+BEGIN_SRC sql
-    mysql> SELECT e.emp_id, e.fname, e.lname, b.name
-    FROM employee e INNER JOIN <1> b
-    ON e.assigned_branch_id = b.<2>;
+  SELECT e.emp_id, e.fname, e.lname, b.name FROM employee e INNER JOIN <1> b ON e.assigned_branch_id = b.<2>; #+END_SRC 
+  SELECT e.emp_id, e.fname, e.lname, b.name FROM employee e INNER JOIN branch b ON e.assigned_branch_id = b.branch_id;
+  SELECT e.emp_id, e.fname, e.lname, b.name FROM employee e INNER JOIN <1> b ON e.assigned_branch_id = b.<2>;
+  SELECT e.emp_id, e.fname, e.lname, b.name FROM employee e INNER JOIN branch b ON e.assigned_branch_id = b.branch_id;
   #+END_SRC 
+
+- Write a query
+  that returns the account ID for each nonbusiness customer
+  (customer.cust_type_cd = 'I') with the customer's federal ID (customer.fed_id) and
+  the name of the product on which the account is based (product.name).
 
   #+BEGIN_SRC sql
-    SELECT e.emp_id, e.fname, e.lname, b.name
-      FROM employee e INNER JOIN <1> b
-      ON e.assigned_branch_id = b.<2>;
+    SELECT a.account_id, c.fed_id from account a    
+    INNER JOIN  customer c ON a.cust_id = c.cust_id
+    WHERE c.cust_type_cd = 'I';   
   #+END_SRC 
-
-- Write a query that returns the account ID for each nonbusiness customer (customer.cust_type_cd = 'I') with the customer's federal ID (customer.fed_id) and the name of the product on which the account is based (product.name).
-
- -  
 
 

@@ -46,30 +46,21 @@ While only one of them is mandatory when using MySQL (the select clause), you wi
 | Having      | Filters out unwanted groups                                |
 | Order by    | Sorts rows of final result set by one or more columns      |
  
-
 * The select Clause 
 
 #+BEGIN_SRC sql
-SELECT * FROM department;
-SELECT dept_id, name  FROM department;
-SELECT  name  FROM department;
+SELECT * FROM department; SELECT dept_id, name  FROM department; SELECT  name  FROM department;
 #+END_SRC 
 
 
 
 #+BEGIN_SRC sql
-SELECT emp_id,
-  'ACTIVE',
-  emp_id * 3.14159,
-  UPPER(lname)
-  FROM employee;
+SELECT emp_id, 'ACTIVE', emp_id * 3.14159, UPPER(lname) FROM employee;
 #+END_SRC 
 
 
 #+BEGIN_SRC sql
-SELECT VERSION(),
-  USER(),
-  DATABASE();
+SELECT VERSION(), USER(), DATABASE();
 #+END_SRC 
 
 
@@ -112,21 +103,17 @@ Subquery-generated tables
 
  #+BEGIN_SRC sql
  SELECT e.emp_id, e.fname, e.lname
-   FROM (SELECT emp_id, fname, lname, start_date, title
-   FROM employee) e;
+   FROM (SELECT emp_id, fname, lname, start_date, title FROM employee) e;
  #+END_SRC  
 
 
  #+BEGIN_SRC sql
- SELECT emp_id, fname, lname, start_date, title
-   FROM employee
+ SELECT emp_id, fname, lname, start_date, title FROM employee;
  #+END_SRC  
 
 
  #+BEGIN_SRC sql
-   
-SELECT e.emp_id, e.fname, e.lname, e.start_date, e.title
-  FROM employee e
+ SELECT e.emp_id, e.fname, e.lname, e.start_date, e.title FROM employee e;
  #+END_SRC  
 
 ** Views
@@ -140,16 +127,12 @@ When you issue a query against a view, your query is merged with the view defini
 To demonstrate, here's a view definition that queries the employee table and includes a call to a built-in function:
 
  #+BEGIN_SRC sql
-CREATE VIEW employee_vw AS
-  SELECT emp_id, fname, lname,
-  YEAR(start_date) start_year
-  FROM employee;
+CREATE VIEW employee_vw AS SELECT emp_id, fname, lname, YEAR(start_date) start_year FROM employee;
  #+END_SRC 
 
 
  #+BEGIN_SRC sql
-SELECT emp_id, start_year
-  FROM employee_vw;
+SELECT emp_id, start_year FROM employee_vw;
  #+END_SRC 
  
 ** Table Links
@@ -188,31 +171,21 @@ The where clause is the mechanism for filtering out unwanted rows from your resu
 
 
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title
-  FROM employee
-  WHERE title = 'Head Teller';
+SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller';
 #+END_SRC 
 
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title
-FROM employee
-WHERE title = 'Head Teller'
-AND start_date > '2006-01-01';
+SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' AND start_date > '2006-01-01';
 #+END_SRC 
 
 
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title
-FROM employee
-WHERE title = 'Head Teller'
-OR start_date > '2006-01-01';
+SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' OR start_date > '2006-01-01';
 #+END_SRC 
 
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title
-FROM employee
-WHERE (title = 'Head Teller' AND start_date > '2006-01-01')
-OR (title = 'Teller' AND start_date > '2007-01-01');
+SELECT emp_id, fname, lname, start_date, title FROM employee
+WHERE (title = 'Head Teller' AND start_date > '2006-01-01') OR (title = 'Teller' AND start_date > '2007-01-01');
 #+END_SRC 
 
 * The group by and having Clauses 
@@ -227,10 +200,8 @@ When using the group by clause, you may also use the having clause, which allows
 
 #+BEGIN_SRC sql
 SELECT d.name, count(e.emp_id) num_employees
-FROM department d INNER JOIN employee e
-ON d.dept_id = e.dept_id
-GROUP BY d.name
-HAVING count(e.emp_id) > 2;
+FROM department d INNER JOIN employee e ON d.dept_id = e.dept_id
+GROUP BY d.name HAVING count(e.emp_id) > 2;
 #+END_SRC 
 
 * The order by Clause 
@@ -239,18 +210,8 @@ The order by clause is the mechanism for sorting your result set using either ra
 
 #+BEGIN_SRC sql
 SELECT open_emp_id, product_cd FROM account; 
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT open_emp_id, product_cd
-  FROM account
-  ORDER BY open_emp_id;
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT open_emp_id, product_cd
-FROM account
-ORDER BY open_emp_id, product_cd;
+SELECT open_emp_id, product_cd FROM account ORDER BY open_emp_id;
+SELECT open_emp_id, product_cd FROM account ORDER BY open_emp_id, product_cd;
 #+END_SRC 
 
 ** Ascending Versus Descending Sort Order
@@ -282,8 +243,7 @@ SELECT emp_id, title, start_date, fname, lname
 
    #+BEGIN_SRC sql
 
- SELECT emp_id, fname, lname FROM employee
-   ORDER by lname, fname;
+ SELECT emp_id, fname, lname FROM employee ORDER by lname, fname;
    #+END_SRC 
 
 2. Retrieve the account ID, customer ID, and available balance for all accounts whose status equals 'ACTIVE' and whose available balance is greater than $2,500.
