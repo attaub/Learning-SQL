@@ -45,11 +45,13 @@ While only one of them is mandatory when using MySQL (the select clause), you wi
 | Group by    | Used to group rows together by common column values        |
 | Having      | Filters out unwanted groups                                |
 | Order by    | Sorts rows of final result set by one or more columns      |
- 
+
 * The select Clause 
 
 #+BEGIN_SRC sql
-SELECT * FROM department; SELECT dept_id, name  FROM department; SELECT  name  FROM department;
+ SELECT * FROM department;
+ SELECT dept_id, name  FROM department;
+ SELECT  name  FROM department;
 #+END_SRC 
 
 
@@ -96,6 +98,7 @@ SELECT DISTINCT cust_id
 
 * The from Clause 
 ** Tables
+
 Subquery-generated tables
   A subquery is a query contained within another query.
   Surrounded by parentheses and can be found in various parts of a select statement
@@ -171,32 +174,29 @@ The where clause is the mechanism for filtering out unwanted rows from your resu
 
 
 #+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller';
-#+END_SRC 
 
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' AND start_date > '2006-01-01';
-#+END_SRC 
+  SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller';
 
+  SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' AND start_date > '2006-01-01';
+  
+  SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' OR start_date > '2006-01-01';
 
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title FROM employee WHERE title = 'Head Teller' OR start_date > '2006-01-01';
-#+END_SRC 
-
-#+BEGIN_SRC sql
-SELECT emp_id, fname, lname, start_date, title FROM employee
-WHERE (title = 'Head Teller' AND start_date > '2006-01-01') OR (title = 'Teller' AND start_date > '2007-01-01');
+  SELECT emp_id, fname, lname, start_date, title FROM employee
+  WHERE (title = 'Head Teller' AND start_date > '2006-01-01') OR (title = 'Teller' AND start_date > '2007-01-01');
 #+END_SRC 
 
 * The group by and having Clauses 
 
 All the queries thus far have retrieved raw data without any manipulation.
 
-Sometimes, however, you will want to find trends in your data that will require the database server to cook the data a bit before you retrieve your result set.
+Sometimes, however, you will want to find trends in your data that will require
+the database server to cook the data a bit before you retrieve your result set.
 
 One such mechanism is the group by clause, which is used to group data by column values.
 
-When using the group by clause, you may also use the having clause, which allows you to filter group data in the same way the where clause lets you filter raw data.
+When using the group by clause, you may also use the having clause, which allows
+you to filter group data in the same way the where clause lets you filter raw
+data.
 
 #+BEGIN_SRC sql
 SELECT d.name, count(e.emp_id) num_employees
@@ -218,8 +218,7 @@ SELECT open_emp_id, product_cd FROM account ORDER BY open_emp_id, product_cd;
 
 #+BEGIN_SRC sql
 SELECT account_id, product_cd, open_date, avail_balance
- FROM account
- ORDER BY avail_balance DESC; 
+ FROM account ORDER BY avail_balance DESC; 
 #+END_SRC 
 
 ** Sorting via Expressions
@@ -233,8 +232,7 @@ SELECT cust_id, cust_type_cd, city, state, fed_id
 ** Sorting via Numeric Placeholders
 #+BEGIN_SRC sql
 SELECT emp_id, title, start_date, fname, lname
- FROM employee
- ORDER BY 2, 5;
+ FROM employee ORDER BY 2, 5;
 #+END_SRC 
 
 * Test Your Knowledge 
@@ -242,7 +240,6 @@ SELECT emp_id, title, start_date, fname, lname
 1. Retrieve the employee ID, first name, and last name for all bank employees. Sort by last name and then by first name.
 
    #+BEGIN_SRC sql
-
  SELECT emp_id, fname, lname FROM employee ORDER by lname, fname;
    #+END_SRC 
 
@@ -253,8 +250,7 @@ SELECT emp_id, title, start_date, fname, lname
      WHERE status='ACTIVE'; 
    #+END_SRC 
 
-3. Write a query against the account table that returns the IDs of the employees who opened the accounts (use the account.open_emp_id column).
-   Include a single row for each distinct employee.
+3. Write a query against the account table that returns the IDs of the employees who opened the accounts (use the account.open_emp_id column). Include a single row for each distinct employee.
 
    #+BEGIN_SRC sql
    SELECT * FROM account;

@@ -57,19 +57,20 @@ The select statement includes a having clause in which filter conditions pertain
 
 * Building a Condition 
 
-A condition is made up of one or more expressions coupled with one or more operators. An expression can be any of the following:
+A condition is made up of one or more expressions coupled with one or more operators.
+An expression can be any of the following:
 - A number
 - A column in a table or view
 - A string literal
 - A built-in function
 - A subquery
 - A list of expressions
+
 The operators used within conditions include:
 - Comparison operators, such as =, !=, <, >, <>, LIKE, IN, and BETWEEN
 - Arithmetic operators, such as +, -, *, and /
 
 * Condition Types 
-
 There are many different ways to filter out unwanted data.
 You can look for specific values, sets of values, or ranges of values to include or exclude, or you can use various pattern-searching techniques to look for partial matches when dealing with string data.
 
@@ -83,9 +84,9 @@ dept_id = (SELECT dept_id FROM department WHERE name = 'Loans')
 
 #+BEGIN_SRC sql
 SELECT pt.name product_type, p.name product
-   FROM product p INNER JOIN product_type pt
- ON p.product_type_cd = pt.product_type_cd
-   WHERE pt.name = 'Customer Accounts';
+  FROM product p INNER JOIN product_type pt
+  ON p.product_type_cd = pt.product_type_cd
+  WHERE pt.name = 'Customer Accounts';
 #+END_SRC 
 
 ** Inequality Condition
@@ -140,10 +141,8 @@ SELECT emp_id, fname, lname FROM employee WHERE LEFT(lname, 1) = 'T';
 - Strings containing a certain character anywhere within the string
 - Strings containing a substring anywhere within the string
 - Strings with a specific format, regardless of individual characters
-
-_  Exactly one character
-%  Any number of characters (including 0)
-
+- '_' Exactly one character
+- '%' Any number of characters (including 0)
 
 #+BEGIN_SRC sql
 SELECT lname FROM employee WHERE lname LIKE '_a%e%'; 
@@ -153,15 +152,14 @@ SELECT emp_id, fname, lname FROM employee WHERE lname REGEXP '^[FG]';
 #+END_SRC 
 
 * Not Null: That Four-Letter Word 
-
   Various flavors of null:
     Not applicable
     Value not yet known
     Value undefined
 #+BEGIN_SRC sql
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NULL;
-SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id = NULL;
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NOT NULL; 
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id = NULL;
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6; 
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6 OR superior_emp_id IS NULL; 
 #+END_SRC 

@@ -1,0 +1,161 @@
+#+TITLE: Working With Sets
+#+AUTHOR: ATTA
+#+STARTUP: overview
+#+OPTIONS: toc:1
+#+PROPERTY: header-args :tangle  ./code/ch06_working_with_sets.sql
+
+* Table of contents :toc:
+- [[#set-theory-primer][Set Theory Primer]]
+- [[#set-theory-in-practice][Set Theory in Practice]]
+- [[#set-operators][Set Operators]]
+  - [[#the-union-operator][The union Operator]]
+  - [[#the-intersection-operator][The intersection Operator]]
+  - [[#the-except-operator][The except Operator]]
+- [[#set-operation-rules][Set Operation Rules]]
+  - [[#storing-compund-query-results][Storing Compund Query Results]]
+  - [[#set-operation-precence][Set Operation Precence]]
+- [[#test-your-knowledge][Test Your Knowledge]]
+
+* Set Theory Primer 
+
+Although you can interact with the data in a database one row at a time, relational databases are really all about sets.
+
+Multiple tables can be combined using various set operators.
+
+* Set Theory in Practice 
+#+BEGIN_SRC sql
+ DESC product; 
+ DESC customer; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT 1 num, 'abc' str
+  UNION
+    SELECT 9 num, 'xyz' str; 
+#+END_SRC 
+
+* Set Operators 
+** The union Operator
+#+BEGIN_SRC sql
+SELECT 'IND' type_cd, cust_id, lname name FROM individual
+UNION ALL
+SELECT 'BUS' type_cd, cust_id, name FROM business; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT 'IND' type_cd, cust_id, lname name FROM individual
+UNION ALL
+SELECT 'BUS' type_cd, cust_id, name FROM business
+UNION ALL
+SELECT 'BUS' type_cd, cust_id, name FROM business;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id FROM employee WHERE assigned_branch_id = 2 AND (title = 'Teller' OR title = 'Head Teller')
+UNION ALL
+SELECT DISTINCT open_emp_id FROM account WHERE open_branch_id = 2;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id FROM employee WHERE assigned_branch_id = 2 AND (title = 'Teller' OR title = 'Head Teller')
+UNION
+SELECT DISTINCT open_emp_id FROM account WHERE open_branch_id = 2;
+#+END_SRC 
+
+** The intersection Operator
+#+BEGIN_SRC sql
+SELECT emp_id, fname, lname FROM employee
+INTERSECT
+SELECT cust_id, fname, lname FROM individual;
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id FROM employee WHERE assigned_branch_id = 2 AND (title = 'Teller' OR title = 'Head Teller')
+INTERSECT
+SELECT DISTINCT open_emp_id FROM account WHERE open_branch_id = 2; 
+#+END_SRC 
+
+** The except Operator
+#+BEGIN_SRC sql
+SELECT emp_id FROM employee WHERE assigned_branch_id = 2 AND (title = 'Teller' OR title = 'Head Teller')
+EXCEPT
+SELECT DISTINCT open_emp_id FROM account WHERE open_branch_id = 2;
+#+END_SRC 
+* Set Operation Rules 
+** Storing Compund Query Results
+#+BEGIN_SRC sql
+SELECT emp_id, assigned_branch_id FROM employee WHERE title = 'Teller'
+ UNION
+ SELECT open_emp_id, open_branch_id FROM account WHERE product_cd = 'SAV'
+ ORDER BY emp_id; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+SELECT emp_id, assigned_branch_id FROM employee WHERE title = 'Teller'
+  UNION
+  SELECT open_emp_id, open_branch_id FROM account WHERE product_cd = 'SAV'
+  ORDER BY open_emp_id;
+#+END_SRC 
+  
+** Set Operation Precence
+
+#+BEGIN_SRC sql
+
+  SELECT cust_id FROM account WHERE product_cd IN ('SAV', 'MM')
+  UNION ALL
+  SELECT a.cust_id FROM account a INNER JOIN branch b ON a.open_branch_id = b.branch_id WHERE b.name = 'Woburn Branch'
+  UNION
+  SELECT cust_id FROM account WHERE avail_balance BETWEEN 500 AND 2500;
+
+#+END_SRC 
+
+#+BEGIN_SRC sql
+  SELECT cust_id FROM account WHERE product_cd IN ('SAV', 'MM')
+   UNION
+   SELECT a.cust_id FROM account a INNER JOIN branch b ON a.open_branch_id = b.branch_id WHERE b.name = 'Woburn Branch'
+   UNION ALL
+   SELECT cust_id FROM account WHERE avail_balance BETWEEN 500 AND 2500; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+  SELECT cust_id FROM account
+   WHERE product_cd IN ('SAV', 'MM')
+   UNION
+   SELECT a.cust_id FROM account a
+  INNER JOIN branch b ON a.open_branch_id = b.branch_id
+   WHERE b.name = 'Woburn Branch'
+   UNION ALL
+   SELECT cust_id FROM account
+   WHERE avail_balance BETWEEN 500 AND 2500; 
+#+END_SRC 
+
+#+BEGIN_SRC sql
+  SELECT cust_id FROM account
+   WHERE product_cd IN ('SAV', 'MM')
+   UNION
+   SELECT a.cust_id FROM account a
+  INNER JOIN branch b ON a.open_branch_id = b.branch_id
+   WHERE b.name = 'Woburn Branch'
+   UNION ALL
+   SELECT cust_id FROM account
+   WHERE avail_balance BETWEEN 500 AND 2500; 
+#+END_SRC 
+
+* Test Your Knowledge 
+1. A 
+2. Write a compound query that finds the first and last names of all individual customers along with the first and last names of all employees.
+
+   #+BEGIN_SRC sql
+     SELECT fname, lname FROM individual 
+     UNION
+     SELECT fname, lname FROM employee; 
+   #+END_SRC 
+3. Sort the results from Exercise 6-2 by the lname column.
+
+   #+BEGIN_SRC sql
+
+     SELECT fname, lname FROM individual 
+     UNION
+     SELECT fname, lname FROM employee
+     ORDER BY lname; 
+   #+END_SRC 

@@ -19,9 +19,9 @@ amount = 375.25
 dept_id = (SELECT dept_id FROM department WHERE name = 'Loans')
 
 SELECT pt.name product_type, p.name product
-   FROM product p INNER JOIN product_type pt
- ON p.product_type_cd = pt.product_type_cd
-   WHERE pt.name = 'Customer Accounts';
+  FROM product p INNER JOIN product_type pt
+  ON p.product_type_cd = pt.product_type_cd
+  WHERE pt.name = 'Customer Accounts';
 
 SELECT pt.name product_type, p.name product
 FROM product p INNER JOIN product_type pt
@@ -55,8 +55,8 @@ SELECT emp_id, fname, lname FROM employee WHERE lname LIKE 'F%' OR lname LIKE 'G
 SELECT emp_id, fname, lname FROM employee WHERE lname REGEXP '^[FG]';
 
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NULL;
-SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id = NULL;
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id IS NOT NULL; 
+SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id = NULL;
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6; 
 SELECT emp_id, fname, lname, superior_emp_id FROM employee WHERE superior_emp_id != 6 OR superior_emp_id IS NULL;
 
